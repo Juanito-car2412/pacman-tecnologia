@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pac-Man Tecnología Responsable</title>
+<style>
+body {
+  margin: 0;
+  background: black;
+  color: white;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#hud {
+  width: 600px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: yellow;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  #menuScreen {
+    justify-content:flex-start !important;
+    padding-top:20px !important;
+    overflow-y:auto;
+  }
+  body {
+    overflow-y: auto;
+  }
+
+  canvas {
+    width: 92vw;
+    height: 92vw;
+  }
+
+  #hud {
+    width: 92vw;
+    font-size: 16px;
+  }
+
+  #menuScreen h1 {
+    font-size: 26px !important;
+    line-height: 1.1;
+  }
+
+  #menuScreen h2 {
+    font-size: 14px !important;
+  }
+
+  #menuScreen p,
+  #menuScreen div {
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+
+  #menuScreen button {
+    font-size: 18px !important;
+    padding: 10px 24px !important;
+  }
+
+  #mobileControls {
+    display:flex !important;
+    margin-bottom:20px;
+  }
+
+  #mobileControls button {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    width:65px !important;
+    height:65px !important;
+    font-size:28px !important;
+  }
+
+  #questionModal h2 {
+    font-size: 22px !important;
+    padding: 10px;
+  }
+
+  #questionModal img {
+    width: 220px;
+    height: 150px;
+  }
+}
+
+canvas {
+  background: black;
+  border: 5px solid yellow;
+  box-shadow: 0 0 20px yellow;
+  display: block;
+}
+
+#menuScreen,
+#gameOverScreen,
+#winScreen,
+#questionModal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  text-align: center;
+}
+
+#gameOverScreen,
+#winScreen,
+#questionModal {
+  display: none;
+}
+
+button {
+  padding: 12px 25px;
+  font-size: 22px;
+  border: none;
+  border-radius: 10px;
+  margin: 10px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.trueBtn {
+  background: lime;
+}
+
+.falseBtn {
+  background: red;
+  color: white;
+}
+
+#questionModal img {
+  width: 240px;
+  height: 170px;
+  object-fit: cover;
+  border: 3px solid yellow;
+  border-radius: 10px;
+  margin: 15px;
+}
+</style>
+</head>
+<body>
+
+<div id="menuScreen" style="background:radial-gradient(circle,#111 0%,#000 70%);">
+  <div style="border:4px solid yellow; padding:18px; border-radius:30px; box-shadow:0 0 40px yellow; background:rgba(0,0,0,0.85); width:92%; max-width:420px;">
+
+    <h1 style="font-size:72px;color:yellow;text-shadow:0 0 20px yellow;margin-bottom:10px;letter-spacing:4px;">
+      PAC-MAN
+    </h1>
+
+    <h2 style="font-size:34px;color:cyan;margin-top:0;margin-bottom:30px;text-shadow:0 0 10px cyan;">
+      TECNOLOGÍA RESPONSABLE
+    </h2>
+
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:30px;flex-wrap:wrap;">
+      <div style="background:#111;padding:20px;border-radius:20px;border:2px solid #00f7ff;width:100%;box-shadow:0 0 20px #00f7ff;">
+        <div style="font-size:34px;">🎮</div>
+        <h3 style="color:#00f7ff;">JUEGA</h3>
+        <p style="font-size:12px;line-height:1.3;">Muévete por el laberinto clásico de Pac-Man.</p>
+      </div>
+
+      <div style="background:#111;padding:20px;border-radius:20px;border:2px solid #ff00ea;width:100%;box-shadow:0 0 20px #ff00ea;">
+        <div style="font-size:34px;">🧠</div>
+        <h3 style="color:#ff00ea;">APRENDE</h3>
+        <p style="font-size:12px;line-height:1.3;">Responde preguntas sobre el uso responsable de la tecnología.</p>
+      </div>
+
+      <div style="background:#111;padding:20px;border-radius:20px;border:2px solid lime;width:100%;box-shadow:0 0 20px lime;">
+        <div style="font-size:34px;">👻</div>
+        <h3 style="color:lime;">SOBREVIVE</h3>
+        <p style="font-size:12px;line-height:1.3;">Escapa de los fantasmas y consigue la mayor puntuación.</p>
+      </div>
+    </div>
+
+    <div style="font-size:13px;line-height:1.5;color:white;margin-bottom:35px;">
+      ⭐ Usa las flechas del teclado para mover a Pac-Man.<br>
+      ⭐ Come super pastillas para responder preguntas.<br>
+      ⭐ Si respondes correctamente podrás comer fantasmitas.<br>
+      ⭐ Completa las 20 preguntas para ganar.
+    </div>
+
+    <button onclick="startGame()" style="background:linear-gradient(45deg,yellow,orange); color:black; font-size:20px; padding:12px 28px; border-radius:18px; box-shadow:0 0 25px yellow; transition:0.3s;">
+      ▶ CONTINUAR
+    </button>
+
+    <div style="margin-top:25px;color:#888;font-size:18px;letter-spacing:2px;">
+      ARCADE EDUCATIONAL EDITION
+    </div>
+
+  </div>
+</div>
+
+<div id="gameOverScreen">
+  <h1 style="font-size:70px;color:red;">GAME OVER</h1>
+  <button onclick="restartGame()" style="background:lime;">REINICIAR</button>
+</div>
+
+<div id="winScreen">
+  <h1 style="font-size:70px;color:lime;">¡GANASTE!</h1>
+  <button onclick="restartGame()" style="background:yellow;">JUGAR OTRA VEZ</button>
+</div>
+
+<div id="hud">
+  <div>Puntos: <span id="score">0</span></div>
+  <div>Super Pastillas: <span id="powerCount">0</span>/20</div>
+</div>
+
+<canvas id="game" width="588" height="588"></canvas>
+
+<div id="mobileControls" style="display:flex;flex-direction:column;align-items:center;margin-top:15px;gap:8px;">
+  <button onclick="setDirection('up')" style="width:70px;height:70px;font-size:30px;background:#222;color:white;border:3px solid yellow;border-radius:15px;">⬆</button>
+  <div style="display:flex;gap:12px;">
+    <button onclick="setDirection('left')" style="width:70px;height:70px;font-size:30px;background:#222;color:white;border:3px solid yellow;border-radius:15px;">⬅</button>
+    <button onclick="setDirection('down')" style="width:70px;height:70px;font-size:30px;background:#222;color:white;border:3px solid yellow;border-radius:15px;">⬇</button>
+    <button onclick="setDirection('right')" style="width:70px;height:70px;font-size:30px;background:#222;color:white;border:3px solid yellow;border-radius:15px;">➡</button>
+  </div>
+</div>
+
+<div id="questionModal">
+  <h2 id="questionText"></h2>
+  <img id="questionImage" src="">
+  <div>
+    <button class="trueBtn" onclick="answerQuestion(true)">Verdadero</button>
+    <button class="falseBtn" onclick="answerQuestion(false)">Falso</button>
+  </div>
+  <p id="message"></p>
+</div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+const tileSize = 28;
+const rows = 21;
+const cols = 21;
+
+const scoreEl = document.getElementById('score');
+const powerCountEl = document.getElementById('powerCount');
+const modal = document.getElementById('questionModal');
+const questionText = document.getElementById('questionText');
+const questionImage = document.getElementById('questionImage');
+const message = document.getElementById('message');
+
+let score = 0;
+let paused = false;
+let ghostsBlue = false;
+let powerCount = 0;
+let currentQuestion = 0;
+let gameStarted = false;
+
+function shuffleArray(array) {
+  for(let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+const questions = [
+  {q:'Compartir contraseñas con desconocidos es seguro.',a:false,img:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'},
+  {q:'Debes respetar a otras personas en internet.',a:true,img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f'},
+  {q:'Es correcto pasar todo el día jugando videojuegos.',a:false,img:'https://images.unsplash.com/photo-1511512578047-dfb367046420'},
+  {q:'Debes verificar si una noticia es verdadera.',a:true,img:'https://images.unsplash.com/photo-1504711434969-e33886168f5c'},
+  {q:'Es importante descansar de las pantallas.',a:true,img:'https://images.unsplash.com/photo-1498050108023-c5249f4df085'},
+  {q:'Puedes hablar con desconocidos sin cuidado en internet.',a:false,img:'https://images.unsplash.com/photo-1518770660439-4636190af475'},
+  {q:'Debes usar contraseñas seguras.',a:true,img:'https://images.unsplash.com/photo-1614064641938-3bbee52942c7'},
+  {q:'Está bien compartir datos personales con cualquiera.',a:false,img:'https://images.unsplash.com/photo-1563013544-824ae1b704d3'},
+  {q:'Es bueno usar la tecnología para aprender.',a:true,img:'https://images.unsplash.com/photo-1509062522246-3755977927d7'},
+  {q:'Debes ignorar el ciberacoso.',a:false,img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f'},
+  {q:'Es importante cuidar tu privacidad.',a:true,img:'https://images.unsplash.com/photo-1550751827-4bd374c3f58b'},
+  {q:'Debes aceptar todos los enlaces que recibes.',a:false,img:'https://images.unsplash.com/photo-1516321318423-f06f85e504b3'},
+  {q:'Usar tecnología con moderación es saludable.',a:true,img:'https://images.unsplash.com/photo-1496171367470-9ed9a91ea931'},
+  {q:'Es correcto copiar tareas de internet.',a:false,img:'https://images.unsplash.com/photo-1455390582262-044cdead277a'},
+  {q:'Debes pedir ayuda si ves contenido peligroso.',a:true,img:'https://images.unsplash.com/photo-1516321497487-e288fb19713f'},
+  {q:'Es seguro descargar archivos desconocidos.',a:false,img:'https://images.unsplash.com/photo-1518770660439-4636190af475'},
+  {q:'La tecnología puede ayudar en la educación.',a:true,img:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b'},
+  {q:'Puedes usar cualquier aplicación sin revisar permisos.',a:false,img:'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c'},
+  {q:'Debes respetar las reglas en línea.',a:true,img:'https://images.unsplash.com/photo-1522202176988-66273c2fd55f'},
+  {q:'Pasar muchas horas seguidas frente a la pantalla es recomendable.',a:false,img:'https://images.unsplash.com/photo-1511512578047-dfb367046420'}
+];
+
+shuffleArray(questions);
+
+const map = [
+'#####################',
+'#.........#.........#',
+'#o###.###.#.###.###o#',
+'#...................#',
+'#.###.#.#####.#.###.#',
+'#.....#...#...#.....#',
+'#####.### # ###.#####',
+'    #.#       #.#    ',
+'#####.# ##-## #.#####',
+'     .  #GGG#  .     ',
+'#####.# ##### #.#####',
+'    #.#       #.#    ',
+'#####.# ##### #.#####',
+'#.........#.........#',
+'#.###.###.#.###.###.#',
+'#o..#...........#..o#',
+'###.#.#.#####.#.#.###',
+'#.....#...#...#.....#',
+'#.#######.#.#######.#',
+'#...................#',
+'#####################'
+];
+
+const pacman = {
+  x: tileSize + tileSize/2,
+  y: tileSize + tileSize/2,
+  radius: 12,
+  speed: 2,
+  dx: 0,
+  dy: 0,
+  mouth: 0.2,
+  mouthDir: 1
+};
+
+const ghosts = [
+  {x:280,y:252,color:'red',dx:2,dy:0},
+  {x:308,y:252,color:'pink',dx:-2,dy:0},
+  {x:280,y:280,color:'cyan',dx:0,dy:2},
+  {x:308,y:280,color:'orange',dx:0,dy:-2}
+];
+
+function drawMap() {
+  for(let r=0;r<rows;r++) {
+    for(let c=0;c<cols;c++) {
+      const tile = map[r][c];
+      const x = c*tileSize;
+      const y = r*tileSize;
+
+      if(tile === '#') {
+        ctx.fillStyle = 'blue';
+        ctx.fillRect(x,y,tileSize,tileSize);
+      }
+
+      if(tile === '.') {
+        ctx.fillStyle = 'white';
+        ctx.beginPath();
+        ctx.arc(x+14,y+14,3,0,Math.PI*2);
+        ctx.fill();
+      }
+
+      if(tile === 'o') {
+        ctx.fillStyle = 'yellow';
+        ctx.beginPath();
+        ctx.arc(x+14,y+14,7,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+function drawPacman() {
+  ctx.fillStyle = 'yellow';
+  ctx.beginPath();
+  ctx.arc(pacman.x,pacman.y,pacman.radius,pacman.mouth,Math.PI*2-pacman.mouth);
+  ctx.lineTo(pacman.x,pacman.y);
+  ctx.fill();
+
+  pacman.mouth += 0.04 * pacman.mouthDir;
+  if(pacman.mouth > 0.4 || pacman.mouth < 0.05) {
+    pacman.mouthDir *= -1;
+  }
+}
+
+function drawGhost(g) {
+  ctx.fillStyle = ghostsBlue ? '#1E90FF' : g.color;
+
+  ctx.beginPath();
+  ctx.arc(g.x,g.y,12,Math.PI,0);
+  ctx.lineTo(g.x+12,g.y+12);
+  ctx.lineTo(g.x+6,g.y+8);
+  ctx.lineTo(g.x,g.y+12);
+  ctx.lineTo(g.x-6,g.y+8);
+  ctx.lineTo(g.x-12,g.y+12);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(g.x-4,g.y-2,3,0,Math.PI*2);
+  ctx.arc(g.x+4,g.y-2,3,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle = 'black';
+  ctx.beginPath();
+  ctx.arc(g.x-4,g.y-2,1.5,0,Math.PI*2);
+  ctx.arc(g.x+4,g.y-2,1.5,0,Math.PI*2);
+  ctx.fill();
+}
+
+function canMove(x,y) {
+  const col = Math.floor(x/tileSize);
+  const row = Math.floor(y/tileSize);
+
+  if(row < 0 || row >= rows || col < 0 || col >= cols) return false;
+  return map[row][col] !== '#';
+}
+
+function movePacman() {
+  const nextX = pacman.x + pacman.dx;
+  const nextY = pacman.y + pacman.dy;
+
+  if(canMove(nextX,nextY)) {
+    pacman.x = nextX;
+    pacman.y = nextY;
+  }
+
+  const row = Math.floor(pacman.y/tileSize);
+  const col = Math.floor(pacman.x/tileSize);
+
+  if(map[row][col] === '.') {
+    map[row] = replaceChar(map[row], col, ' ');
+    score += 10;
+  }
+
+  if(map[row][col] === 'o') {
+    map[row] = replaceChar(map[row], col, ' ');
+    score += 50;
+    powerCount++;
+    powerCountEl.textContent = powerCount;
+
+    if(powerCount < 20) {
+      spawnNewPowerPellet();
+    }
+
+    askQuestion();
+  }
+
+  scoreEl.textContent = score;
+}
+
+function moveGhosts() {
+  ghosts.forEach(g => {
+
+    const directions = [
+      {dx:2,dy:0},
+      {dx:-2,dy:0},
+      {dx:0,dy:2},
+      {dx:0,dy:-2}
+    ];
+
+    if(!canMove(g.x + g.dx, g.y + g.dy) || Math.random() < 0.08) {
+
+      const validDirs = directions.filter(dir => {
+        return canMove(g.x + dir.dx, g.y + dir.dy);
+      });
+
+      const randomDir = validDirs[Math.floor(Math.random() * validDirs.length)];
+
+      if(randomDir) {
+        g.dx = randomDir.dx;
+        g.dy = randomDir.dy;
+      }
+    }
+
+    g.x += g.dx;
+    g.y += g.dy;
+
+    if(g.x < -10) g.x = canvas.width + 10;
+    if(g.x > canvas.width + 10) g.x = -10;
+
+    drawGhost(g);
+
+    const dist = Math.hypot(g.x - pacman.x, g.y - pacman.y);
+
+    if(dist < 18) {
+      if(ghostsBlue) {
+        score += 200;
+        scoreEl.textContent = score;
+
+        g.x = 294;
+        g.y = 294;
+        g.dx = 2;
+        g.dy = 0;
+      } else {
+        paused = true;
+        gameStarted = false;
+        document.getElementById('gameOverScreen').style.display = 'flex';
+      }
+    }
+  });
+}
+
+function askQuestion() {
+  paused = true;
+  const q = questions[currentQuestion % questions.length];
+  questionText.textContent = q.q;
+  questionImage.src = q.img;
+  modal.style.display = 'flex';
+  message.textContent = '';
+}
+
+function answerQuestion(ans) {
+  const q = questions[currentQuestion % questions.length];
+
+  if(ans === q.a) {
+    message.textContent = '¡Correcto! Ahora puedes comer fantasmitas 👻';
+    ghostsBlue = true;
+
+    setTimeout(() => {
+      ghostsBlue = false;
+    },7000);
+  } else {
+    message.textContent = 'Incorrecto';
+  }
+
+  currentQuestion++;
+
+  setTimeout(() => {
+    modal.style.display = 'none';
+    paused = false;
+
+    if(powerCount >= 20) {
+      document.getElementById('winScreen').style.display = 'flex';
+      paused = true;
+      gameStarted = false;
+    }
+  },1500);
+}
+
+function spawnNewPowerPellet() {
+  let emptySpaces = [];
+
+  for(let r = 0; r < rows; r++) {
+    for(let c = 0; c < cols; c++) {
+      if(map[r][c] === '.') {
+        emptySpaces.push({r,c});
+      }
+    }
+  }
+
+  if(emptySpaces.length > 0) {
+    const randomSpot = emptySpaces[Math.floor(Math.random() * emptySpaces.length)];
+    map[randomSpot.r] = replaceChar(map[randomSpot.r], randomSpot.c, 'o');
+  }
+}
+
+function replaceChar(str,index,char) {
+  return str.substring(0,index) + char + str.substring(index+1);
+}
+
+function startGame() {
+  document.getElementById('menuScreen').style.display = 'none';
+  gameStarted = true;
+  paused = false;
+}
+
+function restartGame() {
+  location.reload();
+}
+
+window.answerQuestion = answerQuestion;
+window.startGame = startGame;
+window.restartGame = restartGame;
+
+function setDirection(dir) {
+  if(dir === 'right') {
+    pacman.dx = pacman.speed;
+    pacman.dy = 0;
+  }
+
+  if(dir === 'left') {
+    pacman.dx = -pacman.speed;
+    pacman.dy = 0;
+  }
+
+  if(dir === 'up') {
+    pacman.dy = -pacman.speed;
+    pacman.dx = 0;
+  }
+
+  if(dir === 'down') {
+    pacman.dy = pacman.speed;
+    pacman.dx = 0;
+  }
+}
+
+window.addEventListener('keydown', e => {
+  if(e.key === 'ArrowRight') setDirection('right');
+  if(e.key === 'ArrowLeft') setDirection('left');
+  if(e.key === 'ArrowUp') setDirection('up');
+  if(e.key === 'ArrowDown') setDirection('down');
+});
+
+function gameLoop() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  drawMap();
+
+  if(gameStarted && !paused) {
+    movePacman();
+    moveGhosts();
+  } else {
+    ghosts.forEach(g => drawGhost(g));
+  }
+
+  drawPacman();
+
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
